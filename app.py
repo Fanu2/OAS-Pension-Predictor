@@ -40,8 +40,8 @@ current_year = date.today().year
 age = current_year - birth_year
 
 # --- Prepare Timeline Data ---
-periods = sorted(st.session_state.residency_periods, key=lambda x: x[0])
 timeline_data = []
+periods = sorted(st.session_state.residency_periods, key=lambda x: x[0])
 
 # Add green periods (residency)
 for s, e in periods:
@@ -53,7 +53,7 @@ for s, e in periods:
         "Color": "green"
     })
 
-# Add red gaps (optional, periods between entries)
+# Add red gaps
 for i in range(1, len(periods)):
     prev_end = periods[i-1][1]
     curr_start = periods[i][0]
@@ -66,10 +66,14 @@ for i in range(1, len(periods)):
             "Color": "red"
         })
 
+# Create DataFrame
 df = pd.DataFrame(timeline_data)
 
-# --- Calculate Total Days ---
-total_days = df[df['Color']=='green']['Days'].sum()
+# --- Calculate Total Days safely ---
+if 'Color' in df.columns and not df.empty:
+    total_days = df.loc[df['Color']=='green', 'Days'].sum()
+else:
+    total_days = 0
 
 # --- Eligibility Logic ---
 eligible = age >= 65 and citizenship == "Yes" and total_days >= 3650  # 10 years ≈ 3650 days
