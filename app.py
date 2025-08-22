@@ -18,23 +18,27 @@ max_date = date.today()
 with st.form("add_period_form"):
     from_date = st.date_input("From Date:", min_value=min_date, max_value=max_date)
 
-    # To Date picker: selectable from From Date up to today
-    to_date = st.date_input("To Date:", min_value=from_date, max_value=max_date)
+    # To Date picker: Allow selection of any date (not restricted by from_date)
+    to_date = st.date_input("To Date:", min_value=min_date, max_value=max_date)
 
     add_period = st.form_submit_button("Add Period")
 
     if add_period:
-        # Check for overlapping periods
-        overlap = False
-        for s, e in st.session_state.residency_periods:
-            if not (to_date < s or from_date > e):
-                overlap = True
-                break
-        if overlap:
-            st.error("This period overlaps with an existing period. Please select a non-overlapping period.")
+        # Validate that to_date is not before from_date
+        if to_date < from_date:
+            st.error("To Date cannot be before From Date. Please select a valid date range.")
         else:
-            st.session_state.residency_periods.append((from_date, to_date))
-            st.success(f"Added period: {from_date} → {to_date}")
+            # Check for overlapping periods
+            overlap = False
+            for s, e in st.session_state.residency_periods:
+                if not (to_date < s or from_date > e):
+                    overlap = True
+                    break
+            if overlap:
+                st.error("This period overlaps with an existing period. Please select a non-overlapping period.")
+            else:
+                st.session_state.residency_periods.append((from_date, to_date))
+                st.success(f"Added period: {from_date} → {to_date}")
 
 # --- Display periods with actual days & remove buttons ---
 if st.session_state.residency_periods:
