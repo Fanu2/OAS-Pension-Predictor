@@ -1,35 +1,27 @@
-# Old Age Security (OAS) Eligibility & Timeline Calculator
+# Old Age Security (OAS) Eligibility Calculator
 
-![OAS](https://img.shields.io/badge/Status-Prototype-blue)
-
-## Overview
-The **OAS Eligibility & Timeline Calculator** is a web app built with Streamlit that helps users determine their eligibility for the Old Age Security (OAS) pension in Canada.  
-It also visualizes the periods a user has lived in Canada after age 18 to ensure they meet the legal minimum residence requirement.
+This is a Streamlit web app to help Canadian residents calculate their eligibility for **Old Age Security (OAS)** based on their residence history after 2010. It provides an **interactive timeline**, displays **eligible days per period**, and calculates **total eligible days** for OAS.
 
 ---
 
 ## Features
-- **Eligibility Check:** Determines if you meet the OAS requirements based on age, citizenship/residency, and years lived in Canada.  
-- **Residence Timeline:** Visualizes your time spent in Canada after age 18, helping you understand whether you meet the 10-year minimum.  
-- **OAS Pension Estimate:** Estimates full or partial OAS pension based on your years of residence.
+
+- **Add multiple residence periods** with **From** and **To** dates.  
+- **Non-overlapping validation** ensures periods do not conflict.  
+- **Display eligible days per period** and **total eligible days**.  
+- **Remove periods** safely at any time.  
+- **Interactive timeline** visualizing:
+  - Green bars → periods counting toward OAS  
+  - Red bars → gaps between residence periods  
+- **Eligibility check** based on age, citizenship, and total residence days.  
+- **Partial OAS calculation** (approximate based on residence days).
 
 ---
 
 ## How to Use
-1. Enter your **year of birth**.  
-2. Select your **citizenship or residency status**.  
-3. Input the **periods you lived in Canada after age 18** in the format `YYYY-YYYY`, one per line.  
-4. The app will display:
-   - Eligibility result
-   - Reasons if not eligible
-   - Visual timeline of residence
-   - Estimated OAS pension amount (simplified)
 
----
-
-## Installation (Optional for Local Use)
-```bash
-git clone <repo-url>
-cd <repo-folder>
-pip install -r requirements.txt
-streamlit run oas_eligibility_app.py
+1. Select your **birth year** and indicate if you are a **Canadian citizen or legal resident**.  
+2. Add residence periods using the **From** and **To** date pickers (from 2010 onwards).  
+3. Ensure periods **do not overlap**.  
+4. View the **table of periods** showing eligible days and the **total days**.  
+5. Check the **interactive timeline** to visualize
