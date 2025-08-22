@@ -18,17 +18,8 @@ max_date = date.today()
 with st.form("add_period_form"):
     from_date = st.date_input("From Date:", min_value=min_date, max_value=max_date)
 
-    # Correct To Date picker
-    default_to = from_date + timedelta(days=1)
-    if default_to > max_date:
-        default_to = from_date
-
-    to_date = st.date_input(
-        "To Date:",
-        value=default_to,
-        min_value=from_date,
-        max_value=max_date
-    )
+    # To Date picker: selectable from From Date up to today
+    to_date = st.date_input("To Date:", min_value=from_date, max_value=max_date)
 
     add_period = st.form_submit_button("Add Period")
 
