@@ -17,7 +17,10 @@ max_date = date.today()
 # --- Add period with date pickers ---
 with st.form("add_period_form"):
     from_date = st.date_input("From Date:", min_value=min_date, max_value=max_date)
-    to_date = st.date_input("To Date:", min_value=from_date, max_value=max_date)
+    
+    # Fixed To Date picker
+    to_date = st.date_input("To Date:", value=from_date, min_value=from_date, max_value=max_date)
+    
     add_period = st.form_submit_button("Add Period")
 
     if add_period:
