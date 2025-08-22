@@ -1,48 +1,45 @@
 import streamlit as st
-from datetime import date
 import pandas as pd
 import plotly.express as px
 
 st.set_page_config(page_title="OAS Eligibility Calculator", page_icon="👵")
-st.title("OAS Eligibility & Timeline with Multiple Periods")
-st.write("Add multiple residence periods (from and to dates) after 2010. Eligible days and total are displayed.")
+st.title("OAS Eligibility Calculator - Year Selector")
+st.write("Add multiple residence periods using From and To years (2010 onwards).")
 
 # --- Initialize session state ---
 if "residency_periods" not in st.session_state:
     st.session_state.residency_periods = []
 
-# --- Date Picker Inputs ---
-st.write("Add a period you lived in Canada:")
+# --- Year dropdowns ---
+current_year = 2025  # or use date.today().year
+years = list(range(2010, current_year + 1))
 
 with st.form("add_period_form"):
-    min_date = date(2010, 1, 1)
-    max_date = date.today()
-    start_date = st.date_input("From Date:", min_value=min_date, max_value=max_date)
-    end_date = st.date_input("To Date:", min_value=start_date, max_value=max_date)
+    from_year = st.selectbox("From Year:", years, index=0)
+    to_year = st.selectbox("To Year:", [y for y in years if y >= from_year], index=len(years) - 1)
     add_period = st.form_submit_button("Add Period")
 
     if add_period:
-        # Check for overlap
+        # Check for overlaps
         overlap = False
         for s, e in st.session_state.residency_periods:
-            if not (end_date < s or start_date > e):
+            if not (to_year < s or from_year > e):
                 overlap = True
                 break
         if overlap:
             st.error("This period overlaps with an existing period. Please select a non-overlapping period.")
         else:
-            st.session_state.residency_periods.append((start_date, end_date))
-            st.success(f"Added period: {start_date} → {end_date}")
+            st.session_state.residency_periods.append((from_year, to_year))
+            st.success(f"Added period: {from_year} → {to_year}")
 
 # --- Display periods with eligible days & remove buttons ---
 if st.session_state.residency_periods:
     st.write("### Residence Periods Entered")
     table_data = []
-    # Iterate over copy to safely remove
     for idx, (s, e) in enumerate(st.session_state.residency_periods.copy()):
-        days = (e - s).days + 1
+        days = (e - s + 1) * 365  # Approximate days per year
         table_data.append({"From": s, "To": e, "Eligible Days": days})
-        col1, col2 = st.columns([8,1])
+        col1, col2 = st.columns([8, 1])
         col1.write(f"{idx+1}. {s} → {e} | Eligible Days: {days}")
         if col2.button("Remove", key=f"remove_{idx}"):
             st.session_state.residency_periods.pop(idx)
@@ -54,11 +51,12 @@ if st.session_state.residency_periods:
 else:
     total_days = 0
 
-# --- Eligibility Logic ---
-birth_year = st.number_input("Enter your birth year:", min_value=1900, max_value=date.today().year, value=1958)
+# --- User Inputs for Eligibility ---
+birth_year = st.number_input("Enter your birth year:", min_value=1900, max_value=current_year, value=1958)
 citizenship = st.selectbox("Are you a Canadian citizen or legal resident?", ["Yes", "No"])
-age = date.today().year - birth_year
+age = current_year - birth_year
 
+# --- Eligibility Logic ---
 eligible = age >= 65 and citizenship == "Yes" and total_days >= 3650
 reasons = []
 if age < 65:
@@ -78,17 +76,17 @@ else:
 for r in reasons:
     st.info(r)
 
-# --- Timeline Visualization ---
+# --- Prepare Timeline Data ---
 timeline_data = []
 periods = sorted(st.session_state.residency_periods, key=lambda x: x[0])
 
 # Green periods
 for s, e in periods:
     timeline_data.append({
-        "Start": s,
-        "End": e,
+        "Start": pd.Timestamp(f"{s}-01-01"),
+        "End": pd.Timestamp(f"{e}-12-31"),
         "Label": f"{s} → {e}",
-        "Days": (e - s).days + 1,
+        "Days": (e - s + 1) * 365,
         "Color": "green"
     })
 
@@ -96,17 +94,18 @@ for s, e in periods:
 for i in range(1, len(periods)):
     prev_end = periods[i-1][1]
     curr_start = periods[i][0]
-    if curr_start > prev_end:
+    if curr_start > prev_end + 1:
         timeline_data.append({
-            "Start": prev_end,
-            "End": curr_start,
-            "Label": f"Gap: {prev_end} → {curr_start}",
-            "Days": (curr_start - prev_end).days,
+            "Start": pd.Timestamp(f"{prev_end+1}-01-01"),
+            "End": pd.Timestamp(f"{curr_start-1}-12-31"),
+            "Label": f"Gap: {prev_end+1} → {curr_start-1}",
+            "Days": (curr_start - prev_end - 1) * 365,
             "Color": "red"
         })
 
 df = pd.DataFrame(timeline_data)
 
+# --- Interactive Timeline ---
 if not df.empty:
     st.write("---")
     st.subheader("Interactive Timeline")
